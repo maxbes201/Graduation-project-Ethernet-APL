@@ -27,7 +27,7 @@ This project implements a **Modbus RTU over TCP bridge** using an **STM32F407 Di
 |----------------|---------------------------------------------------|
 | UART2 (RS485)  | `9600 baud`, `9-bit`, `Even parity`, `1 stop bit` |
 | UART3 (Debug)  | `115200 baud`, `8-bit`, `No parity`               |
-| ETH (LwIP)     | MII via ADIN1100 PHY, static IP (RAW API)         |
+| ETH (LwIP)     | MII via Ethernet PHY, static IP (RAW API)         |
 | RS485 GPIOs    | PC9 = DE, PC8 = RE (Active High for TX)           |
 | Word Length    | `UART_WORDLENGTH_9B` (required for even parity)   |
 

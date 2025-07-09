@@ -1,4 +1,4 @@
-# STM32 Modbus RTU over TCP Bridge
+# STM32 Modbus RTU over TCP Bridge using Ethernet-APL
 
 This project implements a **Modbus RTU over TCP bridge** using an **STM32F407 Discovery Board**. It acts as a TCP client that receives Modbus RTU messages encapsulated in Ethernet frames, forwards them over RS485 as Modbus RTU, and returns the RTU response back over TCP.
 

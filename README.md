@@ -21,7 +21,7 @@ This project implements a **Modbus RTU over TCP bridge** using an **STM32F407 Di
 
 ---
 
-## 🔧 STM32 Configuration Summary
+##  STM32 Configuration Summary
 
 | Peripheral     | Settings                                          |
 |----------------|---------------------------------------------------|
@@ -33,7 +33,7 @@ This project implements a **Modbus RTU over TCP bridge** using an **STM32F407 Di
 
 ---
 
-## ⚙️ System Behavior
+##  System Behavior
 
 ### 1. TCP Connection
 

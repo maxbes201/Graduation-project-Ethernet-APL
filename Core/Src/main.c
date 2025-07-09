@@ -154,9 +154,9 @@ int main(void)
 	  if (tcp_callback)
 	  {
 		  printf("Sending function code request to SA11...");
-
+		  HAL_Delay(1000);
 		  int result = Modbus_send(&huart2, tcp_request_len);
-		  if (result != 0)
+		  if (result < 0)
 		  {
 			  printf("[RS485] Modbus_send failed with code: %d\r\n", result);
 			  tcp_callback = 0;
@@ -165,7 +165,7 @@ int main(void)
 		  }
 
 		  // Send RTU response back to TCP server
-		  tcp_write(client_pcb, uart_rx_buffer, UART_BUFFER_LEN, TCP_WRITE_FLAG_COPY);
+		  tcp_write(client_pcb, uart_rx_buffer, result, TCP_WRITE_FLAG_COPY);
 		  tcp_output(client_pcb);
 
 		  printf("[RS485->TCP] Sending response back to host...\r\n");
@@ -247,7 +247,7 @@ static void MX_USART2_UART_Init(void)
 	/* USER CODE END USART2_Init 1 */
 	huart2.Instance = USART2;
 	huart2.Init.BaudRate = 9600;
-	huart2.Init.WordLength = UART_WORDLENGTH_8B;
+	huart2.Init.WordLength = UART_WORDLENGTH_9B;
 	huart2.Init.StopBits = UART_STOPBITS_1;
 	huart2.Init.Parity = UART_PARITY_EVEN;
 	huart2.Init.Mode = UART_MODE_TX_RX;

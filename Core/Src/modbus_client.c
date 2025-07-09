@@ -40,13 +40,21 @@
 #include "stm32f4xx_hal.h"
 
 /* Configuration */
-
+#define INTERBYTE_TIMEOUT 20
 
 //UART_HandleTypeDef huart2;
 uint8_t uart_rx_buffer[UART_BUFFER_LEN];
 uint8_t uart_tx_buffer[UART_BUFFER_LEN];
 uint8_t byte = 0;
-//uint16_t rx_count = 0;
+
+int32_t UART_getChar(UART_HandleTypeDef *uart)
+{
+ int32_t uart_char = -1;
+ if (__HAL_UART_GET_FLAG(uart, UART_FLAG_RXNE) == SET)
+  uart_char = uart->Instance->DR & 0xFF;
+
+ return uart_char;
+}
 /* main program code */
 
 /* RS485 direction control */
@@ -68,23 +76,25 @@ void RS485_SetReceive(void)
 
 int Modbus_send(UART_HandleTypeDef *huart2, uint16_t request_len)
 {
+	HAL_Delay(500);
 	uint16_t i = 0;
-
-	__HAL_UART_CLEAR_OREFLAG(huart2);  // Clear Overrun
-
-	while (__HAL_UART_GET_FLAG(huart2, UART_FLAG_RXNE))
-	{
-	    volatile uint8_t dummy = huart2->Instance->DR;
-	    (void)dummy;
-	}
-
-	//HAL_GPIO_WritePin(RS485_RE_GPIO_Port, RS485_RE_Pin, GPIO_PIN_RESET);
+	int32_t uart_char = -1;
 
 	if (request_len == 0 || request_len > UART_BUFFER_LEN)
 	{
 		printf("[RS485] Invalid request length: %u\r\n", request_len);
 		return -1;
 	}
+
+	// === Clear UART state and buffer ===
+	__HAL_UART_CLEAR_OREFLAG(huart2);
+	while (__HAL_UART_GET_FLAG(huart2, UART_FLAG_RXNE))
+	{
+	    volatile uint8_t dummy = huart2->Instance->DR;
+	    (void)dummy;
+	}
+
+	memset(uart_rx_buffer, 0, UART_BUFFER_LEN); // Clear buffer and receive response
 
 	// Debug: Print request contents in hex
 	printf("[RS485] Transmitting %d bytes: ", request_len);
@@ -96,7 +106,7 @@ int Modbus_send(UART_HandleTypeDef *huart2, uint16_t request_len)
 
 	// Send RTU request over RS485
 	RS485_SetTransmit();
-	HAL_Delay(3);
+	HAL_Delay(10);
 
 	if (HAL_UART_Transmit(huart2, uart_tx_buffer, request_len, UART_TIMEOUT) != HAL_OK)
 	{
@@ -105,52 +115,51 @@ int Modbus_send(UART_HandleTypeDef *huart2, uint16_t request_len)
 	}
 
 	while (__HAL_UART_GET_FLAG(huart2, UART_FLAG_TC) == RESET); // wait for completion of transmission
-	HAL_Delay(2);
+
 
 	// Switch to receive mode
 	RS485_SetReceive();
 	HAL_Delay(3);
 
-	memset(uart_rx_buffer, 0, UART_BUFFER_LEN); // Clear buffer and receive response
-
-	// === Manual RX using polling and inter-byte timeout ===
+	// === Manual RX with inter-byte timeout ===
 	i = 0;
-
-	#define RESPONSE_TIMEOUT 500  // max total time
-	#define INTERBYTE_TIMEOUT 10  // time between bytes
-
 	uint32_t start = HAL_GetTick();
 	uint32_t last_byte = start;
 
-	while ((HAL_GetTick() - last_byte < INTERBYTE_TIMEOUT) && (HAL_GetTick() - start < RESPONSE_TIMEOUT))
+	while (1)
 	{
-	    if (__HAL_UART_GET_FLAG(huart2, UART_FLAG_RXNE))
-	    {
-	        if (i < UART_BUFFER_LEN)
-	        {
-	            uart_rx_buffer[i] = huart2->Instance->DR;
-	            if (uart_rx_buffer[i] == -1)
-	            {
-	            	continue;
-	            }
-	            else
-	            {
-	            	i++;
-	            }
+		if ((HAL_GetTick() - start) > UART_TIMEOUT)
+		{
+			printf("[RS485] Timeout waiting for Modbus response.\r\n");
+			break;
+		}
 
-	            last_byte = HAL_GetTick();
-	        }
-	        else
-	        {
-	            printf("[RS485] RX buffer overflow, stopping.\r\n");
-	            break;
-	        }
-	    }
+		uart_char = UART_getChar(huart2);
+
+		if (uart_char == -1)
+		{
+			if (i == 0) last_byte = HAL_GetTick();
+			else if ((HAL_GetTick() - last_byte) > INTERBYTE_TIMEOUT)
+				break;
+			continue;
+		}
+
+		if (i == 0 && uart_char == 0)
+			continue;
+
+		uart_rx_buffer[i++] = uart_char;
+		last_byte = HAL_GetTick();
+
+		if (i >= UART_BUFFER_LEN)
+		{
+			printf("[RS485] RX buffer overflow.\r\n");
+			break;
+		}
 	}
 
 	if (i == 0)
 	{
-		printf("[RS485] No response received.\r\n");
+		printf("[RS485] No response received (timeout waiting for first byte).\r\n");
 		return -3;
 	}
 
@@ -167,5 +176,5 @@ int Modbus_send(UART_HandleTypeDef *huart2, uint16_t request_len)
 		printf("Received response code from SA11: 0x%02X, Length: %d\r\n", func_code, length);
 	}
 
-	return 0;
+	return i;
 }

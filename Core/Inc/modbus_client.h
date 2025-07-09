@@ -34,7 +34,7 @@ extern "C" {
 
 // Public API to start the Modbus client TCP connection
 
-#define UART_TIMEOUT		500
+#define UART_TIMEOUT		1000
 #define UART_BUFFER_LEN		256
 #define RS485_DE_GPIO_Port	GPIOC
 #define RS485_DE_Pin		GPIO_PIN_9
@@ -44,6 +44,13 @@ extern "C" {
 extern uint8_t uart_rx_buffer[UART_BUFFER_LEN];
 extern uint8_t uart_tx_buffer[UART_BUFFER_LEN];
 
+/**
+ * @brief Sends a Modbus RTU frame and receives the response.
+ * @retval >=0 Number of bytes received
+ * @retval -1 Invalid request length
+ * @retval -2 UART transmit error
+ * @retval -3 Timeout waiting for response
+ */
 int Modbus_send(UART_HandleTypeDef *huart2, uint16_t request_len);
 
 #ifdef __cplusplus

@@ -37,7 +37,7 @@ This project implements a **Modbus RTU over TCP bridge** using an **STM32F407 Di
 
 ### 1. TCP Connection
 
-Upon detecting Ethernet link-up, the STM32 connects as a TCP client to: 196.168.1.2:8888
+Upon detecting Ethernet link-up, the STM32 connects as a TCP client
 
 ### 2. Message Handling
 

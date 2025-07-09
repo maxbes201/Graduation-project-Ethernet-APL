@@ -10,14 +10,14 @@ This project implements a **Modbus RTU over TCP bridge** using an **STM32F407 Di
 
 ---
 
-## 📦 Overview
+##  Overview
 
-- 📡 **TCP Client:** Connects to a predefined Modbus TCP server.
-- 🔁 **RS485 UART Bridge:** Translates TCP payload into RTU and vice versa.
-- ⏱ **Reliable Timing:** Supports strict timing constraints of Modbus RTU (inter-byte and request spacing).
-- 🧠 **Custom RX Polling:** Implements byte-accurate receive loop with robust timeout handling.
-- ⚡ **Built on LwIP RAW API:** Low-latency and event-driven Ethernet stack.
-- 🌐 **MII Ethernet:** Via PHY with hardware reset support.
+-  **TCP Client:** Connects to a predefined Modbus TCP server.
+-  **RS485 UART Bridge:** Translates TCP payload into RTU and vice versa.
+-  **Reliable Timing:** Supports strict timing constraints of Modbus RTU (inter-byte and request spacing).
+-  **Custom RX Polling:** Implements byte-accurate receive loop with robust timeout handling.
+-  **Built on LwIP RAW API:** Low-latency and event-driven Ethernet stack.
+-  **MII Ethernet:** Via PHY with hardware reset support.
 
 ---
 

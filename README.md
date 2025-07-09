@@ -1,6 +1,6 @@
 # STM32 Modbus RTU over TCP Bridge
 
-This project implements a **Modbus RTU over TCP bridge** using an **STM32F407 Discovery Board**. It acts as a TCP client that receives Modbus TCP messages, forwards them over RS485 as Modbus RTU, and returns the RTU response back over TCP.
+This project implements a **Modbus RTU over TCP bridge** using an **STM32F407 Discovery Board**. It acts as a TCP client that receives Modbus RTU messages encapsulated in Ethernet frames, forwards them over RS485 as Modbus RTU, and returns the RTU response back over TCP.
 
 ---
 
@@ -12,7 +12,7 @@ This project implements a **Modbus RTU over TCP bridge** using an **STM32F407 Di
 
 ##  Overview
 
--  **TCP Client:** Connects to a predefined Modbus TCP server.
+-  **TCP Client:** Connects to a predefined TCP server.
 -  **RS485 UART Bridge:** Translates TCP payload into RTU and vice versa.
 -  **Reliable Timing:** Supports strict timing constraints of Modbus RTU (inter-byte and request spacing).
 -  **Custom RX Polling:** Implements byte-accurate receive loop with robust timeout handling.
